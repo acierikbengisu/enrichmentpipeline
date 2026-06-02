@@ -86,7 +86,7 @@ def score_query(qname: str) -> dict:
         signals.append(f"entropy_med:{entropy:.2f}")
         score += 1
 
-    if score >= 5:
+    if score >= 4:
         severity = "HIGH"
     elif score >= 2:
         severity = "MED"

@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 """
-mock_dns_query.py — One-off helper to build AWS Lambda Test tab payloads
-for dns_detector/lambda_function.py.
-
-DOES NOT call AWS — hiçbir şey deploy etmez, hiçbir şeye istek atmaz.
-
 Kullanım:
   python3 mock_dns_query.py --dry-run
   python3 mock_dns_query.py --dry-run malicious.xyz google.com
   python3 mock_dns_query.py --print-payload
-  python3 mock_dns_query.py --print-payload xKj9mQpRtVwBcDe.tk
+  python3 scripts/mock_dns_query.py --print-payload xKj9mQpRtVwBcDe.tk
 """
 from __future__ import annotations
 
