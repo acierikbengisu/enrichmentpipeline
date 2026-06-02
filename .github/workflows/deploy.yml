@@ -1,0 +1,71 @@
+name: Deploy Lambdas
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "statemachine/**"
+  workflow_dispatch:
+
+env:
+  AWS_REGION: eu-central-1
+  PROJECT_PREFIX: cloudguard-dns-dev
+
+permissions:
+  id-token: write
+  contents: read
+  security-events: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package Lambda functions
+        run: |
+          for func in dns_detector persist block_ip dashboard_api; do
+            (cd "src/${func}" && zip -r "../../${func}.zip" .)
+          done
+
+      - name: Deploy dns_detector
+        run: |
+          aws lambda update-function-code \
+            --function-name "${{ env.PROJECT_PREFIX }}-dns-detector" \
+            --zip-file "fileb://dns_detector.zip"
+
+      - name: Deploy persist
+        run: |
+          aws lambda update-function-code \
+            --function-name "${{ env.PROJECT_PREFIX }}-persist" \
+            --zip-file "fileb://persist.zip"
+
+      - name: Deploy block_ip
+        run: |
+          aws lambda update-function-code \
+            --function-name "${{ env.PROJECT_PREFIX }}-block-ip" \
+            --zip-file "fileb://block_ip.zip"
+
+      - name: Deploy dashboard_api
+        run: |
+          aws lambda update-function-code \
+            --function-name "${{ env.PROJECT_PREFIX }}-dashboard-api" \
+            --zip-file "fileb://dashboard_api.zip"
