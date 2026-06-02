@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Lambda build artifacts
+build/
+dist/
+*.zip
+
+# Local env
+.env
+.env.local
